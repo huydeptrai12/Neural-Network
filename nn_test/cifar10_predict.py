@@ -1,5 +1,7 @@
 import sys
-sys.path.append("C:\\Users\\nguye\\OneDrive\\Desktop\\CNN\\NEWNN")
+import os
+path = os.getcwd()
+sys.path.append(path)
 
 from nn.commons.library import read_model
 from nn_train.image.prepare_dataset import load_cifar10_data

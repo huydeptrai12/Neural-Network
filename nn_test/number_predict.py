@@ -1,5 +1,7 @@
 import sys
-sys.path.append("C:\\Users\\nguye\\OneDrive\\Desktop\\CNN\\NEWNN")
+import os
+path = os.getcwd()
+sys.path.append(path)
 
 from nn.commons.library import read_model
 from nn_train.image.prepare_dataset import load_mnist_data
@@ -10,7 +12,7 @@ path = "models\\" + number_file_name
 print(path)
 model = read_model(path)
 
-X_train, y_train, X_test, y_test = load_mnist_data(limit=100)
+X_train, y_train, X_test, y_test = load_mnist_data(limit=1000)
 
 predicted = model.predict(X_test, X_scale = True).P
 print(X_train.shape)

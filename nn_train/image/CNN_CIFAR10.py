@@ -1,5 +1,7 @@
 import sys
-sys.path.append("C:\\Users\\nguye\\OneDrive\\Desktop\\CNN\\nn")
+import os
+path = os.getcwd()
+sys.path.append(path)
 
 import random
 
@@ -35,7 +37,7 @@ np.seterr(all='warn')
 
 configure_directory()
 
-X_train, y_train, X_nn_train, y_nn_train = load_cifar10_data(limit=1000)
+X_train, y_train, X_nn_train, y_nn_train = load_cifar10_data(limit=100)
 
 embedding = Embedding(X_data=X_train,
                       Y_data=y_train,
