@@ -12,7 +12,6 @@ webupdate.sh
 *eps
 nncheck/
 docs/
-nn_train/
 nn.sh
 *dat
 nnlibs/statistics.py
