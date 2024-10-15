@@ -1,4 +1,4 @@
-name: EpyNN dependencies
+name: nn dependencies
 
 channels:
 - conda-forge

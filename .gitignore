@@ -12,8 +12,8 @@ webupdate.sh
 *eps
 nncheck/
 docs/
-test/
-epynn.sh
+nn_train/
+nn.sh
 *dat
 nnlibs/statistics.py
 nnlive/statistics.py
