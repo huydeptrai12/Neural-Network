@@ -1,6 +1,5 @@
 # nn/nn/settings.py
 
-
 # HYPERPARAMETERS SETTINGS
 se_hPars = {
     # Schedule learning rate

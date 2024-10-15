@@ -4,8 +4,8 @@
 # HYPERPARAMETERS SETTINGS
 se_hPars = {
     # Schedule learning rate
-    'learning_rate': 0.001,
-    'schedule': 'exp_decay',
+    'learning_rate': 0.01,
+    'schedule': 'steady',
     'decay_k': 1e-3,
     'cycle_epochs': 0,
     'cycle_descent': 0,

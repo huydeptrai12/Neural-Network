@@ -23,7 +23,6 @@ def read_pickle(f):
     :rtype: Object
     """
     with open(f, 'rb') as msg:
-        print(f)
         c = pickle.load(msg)
 
     return c
@@ -56,7 +55,7 @@ def write_pickle(f, c):
     with open(f, 'wb') as msg:
         pickle.dump(c,msg)
 
-    return None
+
 
 
 def configure_directory(clear=False):

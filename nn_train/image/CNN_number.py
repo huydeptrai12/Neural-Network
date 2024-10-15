@@ -25,7 +25,7 @@ from nn.dropout.models import Dropout
 from nn.dense.models import Dense
 from nn_train.image.settings import se_hPars
 
-from nn_train.image.prepare_dataset import load_cifar10_data
+from nn_train.image.prepare_dataset import load_mnist_data
 
 ########################## CONFIGURE ##########################
 random.seed(1)
@@ -37,25 +37,26 @@ np.seterr(all='warn')
 
 configure_directory()
 
-X_train, y_train, X_test, y_test = load_cifar10_data(limit=100)
+X_train, y_train, X_test, y_test = load_mnist_data(limit=1000)
 
 embedding = Embedding(X_data=X_train,
                       Y_data=y_train,
                       X_scale=True,
                       Y_encode=True,
-                      batch_size=16,
+                      batch_size=8,
                       relative_size=(1, 0, 0))
 
-name = 'CIFAR10-Convolution-16-2_Pooling-3-Max_Flatten_Dense-64-relu_Dense-10-softmax'
+name = 'NUMBER-Convolution-16-2_Pooling-3-Max_Flatten_Dense-64-relu_Dense-10-softmax'
 
-se_hPars['learning_rate'] = 0.001
+se_hPars['learning_rate'] = 0.01
 se_hPars['softmax_temperature'] = 5
 
 layers = [
     embedding,
-    Convolution(unit_filters=8, filter_size=(3, 3), strides=(1, 1), activate=relu),
-    Pooling(pool_size=(2, 2)),
     Convolution(unit_filters=16, filter_size=(3, 3), strides=(1, 1), activate=relu),
+    Pooling(pool_size=(2, 2)),
+    Convolution(unit_filters=32, filter_size=(3, 3), strides=(1, 1), activate=relu),
+    Convolution(unit_filters=32, filter_size=(3, 3), strides=(1, 1), activate=relu),
     Pooling(pool_size=(2, 2)),
     Flatten(),
     Dense(128, relu),
@@ -63,17 +64,17 @@ layers = [
     Dense(10, softmax)
 ]
 
-layers = [
-    embedding,
-    Convolution(unit_filters=16, filter_size=(3, 3), strides=(1, 1), activate=relu),
-    Convolution(unit_filters=16, filter_size=(3, 3), strides=(1, 1), activate=relu),
-    Pooling(pool_size=(2, 2)),
-    Dropout(0.2),
-    Flatten(),
-    Dense(128, relu),
-    Dropout(0.2),
-    Dense(10, softmax)
-]
+# layers = [
+#     embedding,
+#     Convolution(unit_filters=16, filter_size=(3, 3), strides=(1, 1), activate=relu),
+#     Convolution(unit_filters=16, filter_size=(3, 3), strides=(1, 1), activate=relu),
+#     Pooling(pool_size=(2, 2)),
+#     Dropout(0.2),
+#     Flatten(),
+#     Dense(128, relu),
+#     Dropout(0.2),
+#     Dense(10, softmax)
+# ]
 
 model = nn(layers=layers, name=name)
 
