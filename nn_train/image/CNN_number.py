@@ -43,12 +43,12 @@ embedding = Embedding(X_data=X_train,
                       Y_data=y_train,
                       X_scale=True,
                       Y_encode=True,
-                      batch_size=8,
+                      batch_size=16,
                       relative_size=(1, 0, 0))
 
 name = 'NUMBER-Convolution-16-2_Pooling-3-Max_Flatten_Dense-64-relu_Dense-10-softmax'
 
-se_hPars['learning_rate'] = 0.01
+se_hPars['learning_rate'] = 0.001
 se_hPars['softmax_temperature'] = 5
 
 layers = [
