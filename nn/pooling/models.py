@@ -4,8 +4,8 @@ import numpy as np
 
 # Local application/library specific imports
 from nn.commons.models import Layer
-from nn.pooling.forward import pooling_forward
-from nn.pooling.backward import pooling_backward
+from nn.pooling.forward import pooling_forward, optimized_pooling_forward
+from nn.pooling.backward import pooling_backward, optimized_pooling_backward
 from nn.pooling.parameters import (
     pooling_compute_shapes,
     pooling_initialize_parameters,
@@ -31,7 +31,8 @@ class Pooling(Layer):
     def __init__(self,
                  pool_size=(2, 2),
                  strides=None,
-                 pool=np.max):
+                 pool=np.max,
+                 optimize = False):
 
         super().__init__()
 
@@ -44,7 +45,8 @@ class Pooling(Layer):
 
         self.activation = { 'pool': self.pool.__name__ }
         self.trainable = False
-
+        self.optimize = optimize
+        
         return None
 
     def compute_shapes(self, A):
@@ -74,7 +76,10 @@ class Pooling(Layer):
         :rtype: :class:`numpy.ndarray`
         """
         self.compute_shapes(A)
-        A = pooling_forward(self, A)
+        if (self.optimize):
+            A = optimized_pooling_forward(self, A)
+        else:
+            A = pooling_forward(self, A)
         self.update_shapes(self.fc, self.fs)
 
         return A
@@ -88,7 +93,10 @@ class Pooling(Layer):
         :return: Output of backward propagation for current layer.
         :rtype: :class:`numpy.ndarray`
         """
-        dX = pooling_backward(self, dX)
+        if (self.optimize):
+            dX = optimized_pooling_backward(self, dX)
+        else:
+            dX = pooling_backward(self, dX)
         self.update_shapes(self.bc, self.bs)
 
         return dX
@@ -107,3 +115,6 @@ class Pooling(Layer):
             pooling_update_parameters(self)
 
         return None
+
+    def init(self):
+        self.initialize_parameters()

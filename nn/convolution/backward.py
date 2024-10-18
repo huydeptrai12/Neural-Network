@@ -70,3 +70,36 @@ def convolution_backward(layer, dX):
     layer.bc['dX'] = dX
 
     return dX
+
+def optimized_convolution_backward(layer, dX):
+    """Backward propagate error gradients to previous layer."""
+    # (1) Initialize cache
+    dA = initialize_backward(layer, dX)  # (m, oh, ow, u)
+
+    # (2) Compute gradient of loss with respect to Z
+    dZ = layer.bc['dZ'] = dA * layer.activate(layer.fc['Z'], deriv=True)
+
+    # (3) Initialize backward output dL/dX
+    dX = np.zeros_like(layer.fc['X'])  # (m, h, w, d)
+
+    # (4) Iterate over output height and width
+    for oh in range(layer.d['oh']):
+        for ow in range(layer.d['ow']):
+            # Calculate slice indices based on strides
+            h_start = oh * layer.d['sh']
+            h_end = h_start + layer.d['fh']
+            w_start = ow * layer.d['sw']
+            w_end = w_start + layer.d['fw']
+
+            # Extract the gradient slice for this output pixel
+            dZ_slice = dZ[:, oh, ow, :]  # (m, u)
+
+            # (5) Multiply with the filter weights and accumulate the gradient
+            for c in range(layer.d['d']):  # Iterate over channels
+                dX[:, h_start:h_end, w_start:w_end, c] += np.sum(
+                    dZ_slice[:, None, None, :] * layer.p['W'][:, :, c, :], axis=-1
+                )
+
+    layer.bc['dX'] = dX
+
+    return dX

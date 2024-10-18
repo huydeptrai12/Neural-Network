@@ -6,13 +6,14 @@ from nn.commons.maths import (
     xavier,
     activation_tune,
 )
-from nn.convolution.forward import convolution_forward
-from nn.convolution.backward import convolution_backward
+from nn.convolution.forward import convolution_forward, optimized_convolution_forward
+from nn.convolution.backward import convolution_backward, optimized_convolution_backward
 from nn.convolution.parameters import (
     convolution_compute_shapes,
     convolution_initialize_parameters,
     convolution_compute_gradients,
     convolution_update_parameters,
+    optimized_convolution_compute_gradients
 )
 
 
@@ -53,7 +54,8 @@ class Convolution(Layer):
                  activate=relu,
                  initialization=xavier,
                  use_bias=True,
-                 se_hPars=None):
+                 se_hPars=None,
+                 optimize = False):
         """Initialize instance variable attributes.
         """
         super().__init__()
@@ -71,7 +73,7 @@ class Convolution(Layer):
 
         self.activation = { 'activate': activate.__name__ }
         self.trainable = True
-
+        self.optimize = optimize
         return None
 
     def compute_shapes(self, A):
@@ -101,7 +103,10 @@ class Convolution(Layer):
         :rtype: :class:`numpy.ndarray`
         """
         activation_tune(self.se_hPars)
-        A = convolution_forward(self, A)
+        if (self.optimize):
+            A = optimized_convolution_forward(self, A)
+        else: A = convolution_forward(self, A)
+
         self.update_shapes(self.fc, self.fs)
 
         return A
@@ -116,7 +121,9 @@ class Convolution(Layer):
         :rtype: :class:`numpy.ndarray`
         """
         activation_tune(self.se_hPars)
-        dX = convolution_backward(self, dX)
+        if (self.optimize):
+            dX = optimized_convolution_backward(self, dX)
+        else: dX = convolution_backward(self, dX)
         self.update_shapes(self.bc, self.bs)
 
         return dX
@@ -124,7 +131,9 @@ class Convolution(Layer):
     def compute_gradients(self):
         """Wrapper for :func:`nn.convolution.parameters.convolution_compute_gradients()`.
         """
-        convolution_compute_gradients(self)
+        if (self.optimize):
+            optimized_convolution_compute_gradients(self)
+        else: convolution_compute_gradients(self)
 
         return None
 
@@ -135,3 +144,7 @@ class Convolution(Layer):
             convolution_update_parameters(self)
 
         return None
+    
+    def init(self, A):
+        self.compute_shapes(A)
+        self.initialize_parameters()

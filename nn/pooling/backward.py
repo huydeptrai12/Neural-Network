@@ -24,10 +24,10 @@ def pooling_backward(layer, dX):
     """Backward propagate error gradients to previous layer.
     """
     # (1) Initialize cache
-    dA = initialize_backward(layer, dX)    # (m, oh, ow, d)
+    layer.bc['dA'] = dX  # (m, oh, ow, d)
 
     # (2) Restore pooling block axes
-    dZ = dA
+    dZ = dX
     dZ = np.expand_dims(dZ, axis=3)
     dZ = np.expand_dims(dZ, axis=3)
     # (m, oh, ow, d)         ->
@@ -82,6 +82,36 @@ def pooling_backward(layer, dX):
             dX[:, hs:he, ws:we, :] += dXb
             # (m, ph, pw, d) - dX[:, hs:he, ws:we, :]
             # (m, ph, pw, d) - dXb
+
+    layer.bc['dX'] = dX
+
+    return dX
+
+def optimized_pooling_backward(layer, dX):
+    """Optimized backward propagation for the pooling layer."""
+    layer.bc['dA'] = dX
+    # A_prev = layer.fc['A']  # From forward pass
+    # m, layer.d['h'], layer.d['w'], d = A_prev.shape
+    f_h, f_w = layer.d['ph'], layer.d['pw']
+    stride_h, stride_w = layer.d['sh'], layer.d['sw']
+    # layer.d['oh'], layer.d['ow'] = dX.shape[1:3]
+    dZ = dX
+    # Initialize gradient dA_prev
+    dX = np.zeros_like(layer.fc['X'])
+
+    for i in range(layer.d['oh']):
+        for j in range(layer.d['ow']):
+            h_start, h_end = i * stride_h, i * stride_h + f_h
+            w_start, w_end = j * stride_w, j * stride_w + f_w
+
+            # Slice A_prev
+            A_slice = layer.fc['X'][:, h_start:h_end, w_start : w_end, :]
+
+            # Create mask from A_slice to identify max positions
+            mask = A_slice == np.max(A_slice, axis=(1, 2), keepdims=True)
+
+            # Backpropagate only through the max positions
+            dX[:, h_start:h_end, w_start:w_end, :] += mask * dZ[:, i, j, :][:, np.newaxis, np.newaxis, :]
 
     layer.bc['dX'] = dX
 
