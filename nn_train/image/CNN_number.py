@@ -37,13 +37,13 @@ np.seterr(all='warn')
 
 configure_directory()
 
-X_train, y_train, X_test, y_test = load_mnist_data(limit=1000)
+X_train, y_train, X_test, y_test = load_mnist_data(limit=100)
 
 embedding = Embedding(X_data=X_train,
                       Y_data=y_train,
                       X_scale=True,
                       Y_encode=True,
-                      batch_size=16,
+                      batch_size=8,
                       relative_size=(1, 0, 0))
 
 name = 'NUMBER-Convolution-16-2_Pooling-3-Max_Flatten_Dense-64-relu_Dense-10-softmax'
@@ -53,11 +53,11 @@ se_hPars['softmax_temperature'] = 5
 
 layers = [
     embedding,
-    Convolution(unit_filters=16, filter_size=(3, 3), strides=(1, 1), activate=relu),
-    Pooling(pool_size=(2, 2)),
-    Convolution(unit_filters=32, filter_size=(3, 3), strides=(1, 1), activate=relu),
-    Convolution(unit_filters=32, filter_size=(3, 3), strides=(1, 1), activate=relu),
-    Pooling(pool_size=(2, 2)),
+    Convolution(unit_filters=16, filter_size=(3, 3), strides=(1, 1), activate=relu, optimize=False),
+    Pooling(pool_size=(2, 2), optimize=True),
+    Convolution(unit_filters=32, filter_size=(3, 3), strides=(1, 1), activate=relu, optimize=False),
+    Convolution(unit_filters=32, filter_size=(3, 3), strides=(1, 1), activate=relu, optimize=False),
+    Pooling(pool_size=(2, 2), optimize=True),
     Flatten(),
     Dense(128, relu),
     Dropout(0.2),
@@ -78,14 +78,17 @@ layers = [
 
 model = nn(layers=layers, name=name)
 
-model.initialize(loss='CCE', se_hPars=se_hPars.copy(), end='\n')
+model.initialize(loss='CCE', se_hPars=se_hPars.copy(), end='\r')
 
-model.train(epochs=10, init_logs=True, report=False)
+model.train(epochs=5, init_logs=False, report=False)
 
 #model.plot(path=False)
 
 model.write()
 
-predicted = model.predict(X_test, X_scale=True).P
-x = (predicted == y_test)
-print(x.sum() / X_test.shape[0])
+# predicted = model.predict(X_test, X_scale=True).P
+# x = (predicted == y_test)
+# print(x.sum() / X_test.shape[0])
+
+import psutil; 
+print(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
