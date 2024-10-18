@@ -86,9 +86,9 @@ model.train(epochs=5, init_logs=False, report=False)
 
 model.write()
 
-# predicted = model.predict(X_test, X_scale=True).P
-# x = (predicted == y_test)
-# print(x.sum() / X_test.shape[0])
+predicted = model.predict(X_test, X_scale=True).P
+x = (predicted == y_test)
+print(x.sum() / X_test.shape[0])
 
 import psutil; 
 print(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
